@@ -164,8 +164,15 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
 
         modifier.withCancel(value -> ci.cancel());
         modifier.withReplacement(replacement -> {
+            if (replacement == null || replacement.getString().isEmpty()) return;
             ci.cancel();
-            this.minecraft.getChatListener().handleSystemMessage(replacement, false);
+            this.minecraft.execute(()->{
+                try {
+                    this.minecraft.gui.getChat().addMessage(replacement);
+                } catch (IndexOutOfBoundsException exception) {
+                    exception.printStackTrace();
+                }
+            });
         });
     }
 

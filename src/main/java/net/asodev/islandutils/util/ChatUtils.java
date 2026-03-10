@@ -16,15 +16,17 @@ import java.util.regex.Pattern;
 
 public class ChatUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("IslandUtils");
-    private static final Pattern MCC_HUD_UNSUPPORTED_SYMBOL_PATTERN = Pattern.compile("[^!-)*-9:-?@A-~‘’“”\\s]");
     public static final String CHAT_PREFIX = "&b[&eIslandUtils&b]";
-
     public static final int UPDATE_AVAILABLE_COLOR = TextColor.parseColor("#d1ffab").getOrThrow().getValue();
     public static final int PRE_RELEASE_COLOR_CHANNEL = TextColor.parseColor("#ff9191").getOrThrow().getValue();
     public static final int PRE_RELEASE_COLOR = TextColor.parseColor("#ff5959").getOrThrow().getValue();
     public static final int UPDATE_NAME_COLOR = TextColor.parseColor("#fffbab").getOrThrow().getValue();
     public static final int UPDATE_CLICK_COLOR = TextColor.parseColor("#abdbff").getOrThrow().getValue();
+    private static final Logger LOGGER = LoggerFactory.getLogger("IslandUtils");
+    private static final Pattern MCC_HUD_UNSUPPORTED_SYMBOL_PATTERN = Pattern.compile("[^!-)*-9:-?@A-~‘’“”\\s]");
+
+    private ChatUtils() {
+    }
 
     private static MutableComponent getUpdatePrefix(AvailableUpdate.VersionState type) {
         Component icon;
@@ -100,7 +102,13 @@ public class ChatUtils {
     }
 
     public static void send(Component component) {
-        Minecraft.getInstance().getChatListener().handleSystemMessage(component, false);
+        Minecraft.getInstance().execute(() -> {
+            try {
+                Minecraft.getInstance().gui.getChat().addMessage(component);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static TextColor parseColor(String hex) {
@@ -126,8 +134,5 @@ public class ChatUtils {
         // this hellish abomination of a regex matches any symbols,
         // that are not supported by the mcc:hud font, thus should use the default font.
         return !MCC_HUD_UNSUPPORTED_SYMBOL_PATTERN.matcher(s).find();
-    }
-
-    private ChatUtils() {
     }
 }
